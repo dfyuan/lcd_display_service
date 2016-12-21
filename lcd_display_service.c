@@ -147,7 +147,7 @@ struct picture_s pic_main = {
 	 .p_win = main_window,
 	 .pre_pic = NULL,
 	 .next_pic = NULL,
-	 .child_pic = &pic_effect[1],
+	 .child_pic = &pic_effect[0],
 	 .parent_pic = NULL,
 	 .event_handler = pic_event_handler,
 };
@@ -307,7 +307,7 @@ int lcd_event_handle(int event_id)
 
 void *lcd_display_loop(void *arg)
 {
-	while (1) {
+	while (!service_quit) {
 		pthread_mutex_lock(&active_pic_update_mutex);
 		if (active_pic_update == 1) {
 			display_picture(active_pic);
@@ -317,6 +317,8 @@ void *lcd_display_loop(void *arg)
 
 		usleep(10*1000);
 	}
+
+	return NULL;
 }
 
 void lcd_display_event_handle(struct br_event_t *p_br_event)
