@@ -93,7 +93,6 @@ void window_init(tGUI_EDITOR *p_editor, struct window_des_s *p_win)
 				index %= p_win->attr.lim.lim_int.max;
 				index = index > (p_win->attr.lim.lim_int.max) ? (p_win->attr.lim.lim_int.max) : index;
 				index = index < p_win->attr.lim.lim_int.min ? (p_win->attr.lim.lim_int.min) : index;
-				printf("index = %d\n", index);
 				sprintf(p_editor->value, "%s", p_win->attr.val_des[index]);
 			} else {
 				WARN("index flag not support other type beside ATTR_TYPE_STR\n");
@@ -250,6 +249,7 @@ void dump_attr(struct attribute *p_attr)
 }
 #endif
 
+#if 0
 void dump_window(struct window_des_s *p_win)
 {
 	int i;
@@ -286,4 +286,4 @@ void dump_pic(struct picture_s *p_pic)
 		dump_window(p_pic->p_win + i);
 	}
 }
-
+#endif

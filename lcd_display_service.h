@@ -66,6 +66,12 @@
 #define ATTR_TYPE_STR		1
 #define ATTR_TYPE_INT		2
 
+#define KEY_TYPE_KNOB	1
+#define KEY_TYPE_KEY	2
+
+#define KEY_KNOB_POS	1
+#define KEY_KNOB_NEG	2
+
 struct limit_int {
 	int min;
 	int max;
@@ -76,6 +82,27 @@ struct limit_float {
 	float min;
 	float max;
 	float interval;
+};
+
+struct event_type_s {
+	int type; 	/* key or knob */
+	int knob_dir;
+	int event_id;
+};
+
+struct event_id_s {
+	int pre_event;
+	int next_event;
+	int child_event;
+	int parent_event;
+
+	int knob_pos_win[6];
+	int knob_neg_win[6];
+
+	int knob_pos_pic;
+	int knob_net_pic;
+
+	int misc_event[6];
 };
 
 struct attr_des_s {
@@ -94,8 +121,7 @@ struct attr_des_s {
 
 struct window_des_s {
 	struct attr_des_s attr;
-	int event_id[32];
-	int (*event_handler)(int event_id, int match_event_id[], struct window_des_s *p_win);
+	int (*event_handler)(struct event_type_s event_type, struct window_des_s *p_win);
 };
 
 struct picture_s {
@@ -108,7 +134,7 @@ struct picture_s {
 	struct picture_s *next_pic;
 	struct picture_s *child_pic;
 	struct picture_s *parent_pic;
-	int (*event_handler)(int event_id, struct picture_s *p_pic);
+	struct event_id_s event_id;
 };
 
 #endif
