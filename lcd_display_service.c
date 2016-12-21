@@ -47,6 +47,7 @@ int active_pic_update = 0;
 
 static pthread_mutex_t active_pic_update_mutex = PTHREAD_MUTEX_INITIALIZER;
 
+/**************************** common func APIs ********************************/
 int pic_event_handler(int event_id, struct picture_s *p_pic)
 {
 	int ret = -1;
@@ -91,85 +92,28 @@ int pic_event_handler(int event_id, struct picture_s *p_pic)
 	return ret;
 }
 
-extern struct picture_s pic_main;
-extern struct picture_s pic_sys[];
-extern struct picture_s pic_effect[];
-
-/**************************** main pics ********************************/
-
-void effect_event_handler(int event_id, struct window_des_s *p_win)
+int data_indecrease_hanlder(int event_id, int match_event_id[32], struct window_des_s *p_win)
 {
 	int val = 0;
+	int ret = 0;
 
-	switch (event_id) {
-		case KNOB_EFFECT_POS:
-			p_win->attr.data_func(DATA_READ, &val);
-			val++;
-			p_win->attr.data_func(DATA_WRITE, &val);
-
-			break;
-
-		case KNOB_EFFECT_NEG:
-			p_win->attr.data_func(DATA_READ, &val);
-			val--;
-			p_win->attr.data_func(DATA_WRITE, &val);
-
-			break;
-
-		default:
-			break;
+	if (match_event_id[0] != -1 && event_id == match_event_id[0]) {
+		p_win->attr.data_func(DATA_READ, &val);
+		val++;
+		p_win->attr.data_func(DATA_WRITE, &val);
+	} else if (match_event_id[1] != -1 && event_id == match_event_id[1]) {
+		p_win->attr.data_func(DATA_READ, &val);
+		val--;
+		p_win->attr.data_func(DATA_WRITE, &val);
+	} else {
+		printf("no match event id\n");
+		ret = -1;
 	}
+
+	return ret;
 }
 
-void mic_event_handler(int event_id, struct window_des_s *p_win)
-{
-	int val = 0;
-
-	switch (event_id) {
-		case KNOB_MIC_POS:
-			p_win->attr.data_func(DATA_READ, &val);
-			val++;
-			p_win->attr.data_func(DATA_WRITE, &val);
-
-			break;
-
-		case KNOB_MIC_NEG:
-			p_win->attr.data_func(DATA_READ, &val);
-			val--;
-			p_win->attr.data_func(DATA_WRITE, &val);
-
-			break;
-
-		default:
-			break;
-	}
-}
-
-void music_event_handler(int event_id, struct window_des_s *p_win)
-{
-	int val = 0;
-
-	switch (event_id) {
-		case KNOB_MUSIC_POS:
-			p_win->attr.data_func(DATA_READ, &val);
-			val++;
-			p_win->attr.data_func(DATA_WRITE, &val);
-
-			break;
-
-		case KNOB_MUSIC_NEG:
-			p_win->attr.data_func(DATA_READ, &val);
-			val--;
-			p_win->attr.data_func(DATA_WRITE, &val);
-
-			break;
-
-		default:
-			break;
-	}
-}
-
-int main_data_func(int flag, void *p_data)
+int data_func(int flag, void *p_data)
 {
 	static int val = 1;
 
@@ -182,13 +126,19 @@ int main_data_func(int flag, void *p_data)
 	return 0;
 }
 
+extern struct picture_s pic_main;
+extern struct picture_s pic_sys[];
+extern struct picture_s pic_effect[];
+
+/**************************** main pics ********************************/
+
 struct window_des_s main_window[] = {
-	{ { 1, 0, ATTR_TYPE_NON, "",     ATTR_TYPE_STR,  main_data_func, {"SWEET", "HEROIC", "FLAME"}, .lim.lim_int = {0, 2, 1} }, {-1},  NULL },
-	{ { 0, 0, ATTR_TYPE_STR, "EFF:", ATTR_TYPE_INT,  main_data_func, {}, .lim.lim_int = {0, 100, 1} }, 	{KNOB_EFFECT_POS, KNOB_EFFECT_NEG}, effect_event_handler},
-	{ { 1, 0, ATTR_TYPE_NON, "",     ATTR_TYPE_STR,  main_data_func, {"FB.EX0", "FB.EX1", "FB.EX2", "FB.EX3"}, .lim.lim_int = {0, 3, 1} }, 	{-1}, NULL},
-	{ { 0, 0, ATTR_TYPE_STR, "MIC:", ATTR_TYPE_INT,  main_data_func, {}, .lim.lim_int = {0, 100, 1} }, {KNOB_MIC_POS, KNOB_MIC_NEG}, mic_event_handler},
-	{ { 1, 0, ATTR_TYPE_NON, "",     ATTR_TYPE_STR,  main_data_func, {"M.VOD", "M.BGM", "S/PDIF"}, .lim.lim_int = {0, 2, 1} }, {-1}, NULL},
-	{ { 0, 0, ATTR_TYPE_STR, "MUS:", ATTR_TYPE_INT,  main_data_func, {}, .lim.lim_int = {0, 100, 1} }, {KNOB_MUSIC_POS, KNOB_MUSIC_NEG}, music_event_handler},
+	{ { 1, 0, ATTR_TYPE_NON, "",     ATTR_TYPE_STR,  data_func, {"SWEET", "HEROIC", "FLAME"}, .lim.lim_int = {0, 2, 1} }, {-1},  NULL },
+	{ { 0, 0, ATTR_TYPE_STR, "EFF:", ATTR_TYPE_INT,  data_func, {}, .lim.lim_int = {0, 100, 1} }, 	{KNOB_EFFECT_POS, KNOB_EFFECT_NEG}, data_indecrease_hanlder},
+	{ { 1, 0, ATTR_TYPE_NON, "",     ATTR_TYPE_STR,  data_func, {"FB.EX0", "FB.EX1", "FB.EX2", "FB.EX3"}, .lim.lim_int = {0, 3, 1} }, 	{-1}, NULL},
+	{ { 0, 0, ATTR_TYPE_STR, "MIC:", ATTR_TYPE_INT,  data_func, {}, .lim.lim_int = {0, 100, 1} }, {KNOB_MIC_POS, KNOB_MIC_NEG}, data_indecrease_hanlder},
+	{ { 1, 0, ATTR_TYPE_NON, "",     ATTR_TYPE_STR,  data_func, {"M.VOD", "M.BGM", "S/PDIF"}, .lim.lim_int = {0, 2, 1} }, {-1}, NULL},
+	{ { 0, 0, ATTR_TYPE_STR, "MUS:", ATTR_TYPE_INT,  data_func, {}, .lim.lim_int = {0, 100, 1} }, {KNOB_MUSIC_POS, KNOB_MUSIC_NEG}, data_indecrease_hanlder},
 };
 
 struct picture_s pic_main = {
@@ -204,39 +154,26 @@ struct picture_s pic_main = {
 
 /**************************** effect pics ********************************/
 
-int effect_data_func(int flag, void *p_data)
-{
-	static int val = 1;
-
-	if (flag == DATA_READ) {
-		*(int *)p_data = val;
-	} else if (flag == DATA_WRITE) {
-		val = *(int *)p_data;
-	}
-
-	return 0;
-}
-
 struct window_des_s effect_window[3][4] = {
 	{ /*1*/
 		{ { 0, 0, ATTR_TYPE_STR, "EFFECT", ATTR_TYPE_NON, NULL, {} }, {-1}, NULL },
 		{ { 0, 0, ATTR_TYPE_STR, "menu[1/14]", ATTR_TYPE_NON, NULL, {} }, {-1}, NULL },
 		{ { 0, 0, ATTR_TYPE_STR, "Echo filterBP", ATTR_TYPE_NON, NULL, {} }, {-1}, NULL },
-		{ { 1, 0, ATTR_TYPE_STR, "type", ATTR_TYPE_STR, effect_data_func, { "butt", "reily", "bypass" }, .lim.lim_int = {0, 3, 1} }, {KNOB_MIC_POS, KNOB_MIC_NEG}, mic_event_handler },
+		{ { 1, 0, ATTR_TYPE_STR, "type", ATTR_TYPE_STR, data_func, { "butt", "reily", "bypass" }, .lim.lim_int = {0, 3, 1} }, {KNOB_MIC_POS, KNOB_MIC_NEG}, data_indecrease_hanlder },
 	},
 
 	{ /*2*/
 		{ { 0, 0, ATTR_TYPE_STR, "EFFECT", ATTR_TYPE_NON, NULL, {} }, {-1}, NULL },
 		{ { 0, 0, ATTR_TYPE_STR, "menu[2/14]", ATTR_TYPE_NON, NULL, {} }, {-1}, NULL },
 		{ { 0, 0, ATTR_TYPE_STR, "Echo filterBP", ATTR_TYPE_NON, NULL, {} }, {-1}, NULL },
-		{ { 1, 0, ATTR_TYPE_STR, "l_freq", ATTR_TYPE_STR, effect_data_func, { "butt1", "reily1", "bypass1" }, .lim.lim_int = {0, 3, 1} }, {KNOB_MIC_POS, KNOB_MIC_NEG}, mic_event_handler },
+		{ { 1, 0, ATTR_TYPE_STR, "l_freq", ATTR_TYPE_STR, data_func, { "butt1", "reily1", "bypass1" }, .lim.lim_int = {0, 3, 1} }, {KNOB_MIC_POS, KNOB_MIC_NEG}, data_indecrease_hanlder },
 	},
 
 	{ /*3*/
 		{ { 0, 0, ATTR_TYPE_STR, "EFFECT", ATTR_TYPE_NON, NULL, {} }, {-1}, NULL },
 		{ { 0, 0, ATTR_TYPE_STR, "menu[3/14]", ATTR_TYPE_NON, NULL, {} }, {-1}, NULL },
 		{ { 0, 0, ATTR_TYPE_STR, "Echo filterBP", ATTR_TYPE_NON, NULL, {} }, {-1}, NULL },
-		{ { 1, 0, ATTR_TYPE_STR, "h_freq", ATTR_TYPE_STR, effect_data_func, { "butt2", "reily2", "bypass2" }, .lim.lim_int = {0, 3, 1} }, {KNOB_MIC_POS, KNOB_MIC_NEG}, mic_event_handler },
+		{ { 1, 0, ATTR_TYPE_STR, "h_freq", ATTR_TYPE_STR, data_func, { "butt2", "reily2", "bypass2" }, .lim.lim_int = {0, 3, 1} }, {KNOB_MIC_POS, KNOB_MIC_NEG}, data_indecrease_hanlder },
 	},
 
 };
@@ -278,39 +215,26 @@ struct picture_s pic_effect[] = {
 
 /**************************** sys pics ********************************/
 
-int sys_data_func(int flag, void *p_data)
-{
-	static int val = 1;
-
-	if (flag == DATA_READ) {
-		*(int *)p_data = val;
-	} else if (flag == DATA_WRITE) {
-		val = *(int *)p_data;
-	}
-
-	return 0;
-}
-
 struct window_des_s sys_window[3][4] = {
 	{ /*1*/
 		{ { 0, 0, ATTR_TYPE_STR, "SYSTEM", ATTR_TYPE_NON, NULL, {} }, {-1}, NULL },
 		{ { 0, 0, ATTR_TYPE_STR, "menu[1/14]", ATTR_TYPE_NON, NULL, {} }, {-1}, NULL },
 		{ { 0, 0, ATTR_TYPE_STR, "Option", ATTR_TYPE_NON, NULL, {} }, {-1}, NULL },
-		{ { 1, 0, ATTR_TYPE_STR, "mode", ATTR_TYPE_STR, sys_data_func, { "easy", "full", "bypass" }, .lim.lim_int = {0, 3, 1} }, {KNOB_MIC_POS, KNOB_MIC_NEG}, mic_event_handler },
+		{ { 1, 0, ATTR_TYPE_STR, "mode", ATTR_TYPE_STR, data_func, { "easy", "full", "bypass" }, .lim.lim_int = {0, 3, 1} }, {KNOB_MIC_POS, KNOB_MIC_NEG}, data_indecrease_hanlder },
 	},
 
 	{ /*2*/
 		{ { 0, 0, ATTR_TYPE_STR, "SYSTEM", ATTR_TYPE_NON, NULL, {} }, {-1}, NULL },
 		{ { 0, 0, ATTR_TYPE_STR, "SYSTEM", ATTR_TYPE_NON, NULL, {} }, {-1}, NULL },
 		{ { 0, 0, ATTR_TYPE_STR, "TFT", ATTR_TYPE_NON, NULL, {} }, {-1}, NULL },
-		{ { 1, 0, ATTR_TYPE_STR, "contrast", ATTR_TYPE_STR, sys_data_func, { "butt1", "reily1", "bypass1" }, .lim.lim_int = {0, 3, 1} }, {KNOB_MIC_POS, KNOB_MIC_NEG}, mic_event_handler },
+		{ { 1, 0, ATTR_TYPE_STR, "contrast", ATTR_TYPE_STR, data_func, { "butt1", "reily1", "bypass1" }, .lim.lim_int = {0, 3, 1} }, {KNOB_MIC_POS, KNOB_MIC_NEG}, data_indecrease_hanlder },
 	},
 
 	{ /*3*/
 		{ { 0, 0, ATTR_TYPE_STR, "SYSTEM", ATTR_TYPE_NON, NULL, {} }, {-1}, NULL },
 		{ { 0, 0, ATTR_TYPE_STR, "menu[3/14]", ATTR_TYPE_NON, NULL, {} }, {-1}, NULL },
 		{ { 0, 0, ATTR_TYPE_STR, "Panel", ATTR_TYPE_NON, NULL, {} }, {-1}, NULL },
-		{ { 1, 0, ATTR_TYPE_STR, "Lock", ATTR_TYPE_STR, sys_data_func, { "on", "off", "on/off" }, .lim.lim_int = {0, 3, 1} }, {KNOB_MIC_POS, KNOB_MIC_NEG}, mic_event_handler },
+		{ { 1, 0, ATTR_TYPE_STR, "Lock", ATTR_TYPE_STR, data_func, { "on", "off", "on/off" }, .lim.lim_int = {0, 3, 1} }, {KNOB_MIC_POS, KNOB_MIC_NEG}, data_indecrease_hanlder },
 	},
 
 };
@@ -372,7 +296,7 @@ int lcd_event_handle(int event_id)
 	for (i = 0; i < active_pic->windows_num; i++) {
 		printf("window event handler\n");
 		if (active_pic->p_win[i].event_handler != NULL) {
-			active_pic->p_win[i].event_handler(event_id, &active_pic->p_win[i]);
+			active_pic->p_win[i].event_handler(event_id, active_pic->p_win[i].event_id, &active_pic->p_win[i]);
 		}
 	}
 

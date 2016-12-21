@@ -59,6 +59,13 @@
 #define FOUR_BAR    2
 #define SIX_BAR     3
 
+#define ATTR_DATA_TPYE_INDEX	1
+#define ATTR_DATA_TYPE_DATA		2
+
+#define ATTR_TYPE_NON		0
+#define ATTR_TYPE_STR		1
+#define ATTR_TYPE_INT		2
+
 struct limit_int {
 	int min;
 	int max;
@@ -70,13 +77,6 @@ struct limit_float {
 	float max;
 	float interval;
 };
-
-#define ATTR_DATA_TPYE_INDEX	1
-#define ATTR_DATA_TYPE_DATA		2
-
-#define ATTR_TYPE_NON		0
-#define ATTR_TYPE_STR		1
-#define ATTR_TYPE_INT		2
 
 struct attr_des_s {
 	int data_type; //标记*p_data是索引还是数值
@@ -95,7 +95,7 @@ struct attr_des_s {
 struct window_des_s {
 	struct attr_des_s attr;
 	int event_id[32];
-	void (*event_handler)(int event_id, struct window_des_s *p_win);
+	int (*event_handler)(int event_id, int match_event_id[], struct window_des_s *p_win);
 };
 
 struct picture_s {
