@@ -48,7 +48,7 @@ int active_pic_update = 0;
 static pthread_mutex_t active_pic_update_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 /**************************** common func APIs ********************************/
-int pic_event_handler(int event_id, struct picture_s *p_pic)
+int pic_travel_event_handler(int event_id, struct picture_s *p_pic)
 {
 	int ret = 0;
 
@@ -152,7 +152,7 @@ struct picture_s pic_main = {
 	 .next_pic = NULL,
 	 .child_pic = &pic_effect[0],
 	 .parent_pic = NULL,
-	 .event_handler = pic_event_handler,
+	 .event_handler = pic_travel_event_handler,
 };
 
 /**************************** effect pics ********************************/
@@ -190,7 +190,7 @@ struct picture_s pic_effect[] = {
 	 .next_pic = &pic_effect[1],
 	 .child_pic = &pic_sys[0],
 	 .parent_pic = &pic_main,
-	 .event_handler = pic_event_handler,
+	 .event_handler = pic_travel_event_handler,
 	},
 
 	{
@@ -201,7 +201,7 @@ struct picture_s pic_effect[] = {
 	 .next_pic = &pic_effect[2],
 	 .child_pic = &pic_sys[0],
 	 .parent_pic = &pic_main,
-	 .event_handler = pic_event_handler,
+	 .event_handler = pic_travel_event_handler,
 	},
 
 	{
@@ -212,7 +212,7 @@ struct picture_s pic_effect[] = {
 	 .next_pic = NULL,
 	 .child_pic = &pic_sys[0],
 	 .parent_pic = &pic_main,
-	 .event_handler = pic_event_handler,
+	 .event_handler = pic_travel_event_handler,
 	},
 };
 
@@ -251,7 +251,7 @@ struct picture_s pic_sys[] = {
 	 .next_pic = &pic_sys[1],
 	 .child_pic = NULL,
 	 .parent_pic = &pic_effect[0],
-	 .event_handler = pic_event_handler,
+	 .event_handler = pic_travel_event_handler,
 	},
 
 	{
@@ -262,7 +262,7 @@ struct picture_s pic_sys[] = {
 	 .next_pic = &pic_sys[2],
 	 .child_pic = NULL,
 	 .parent_pic = &pic_effect[0],
-	 .event_handler = pic_event_handler,
+	 .event_handler = pic_travel_event_handler,
 	},
 
 	{
@@ -273,7 +273,7 @@ struct picture_s pic_sys[] = {
 	 .next_pic = NULL,
 	 .child_pic = NULL,
 	 .parent_pic = &pic_effect[0],
-	 .event_handler = pic_event_handler,
+	 .event_handler = pic_travel_event_handler,
 	},
 };
 
