@@ -50,22 +50,22 @@ static pthread_mutex_t active_pic_update_mutex = PTHREAD_MUTEX_INITIALIZER;
 /**************************** common func APIs ********************************/
 int pic_event_handler(int event_id, struct picture_s *p_pic)
 {
-	int ret = -1;
+	int ret = 0;
 
 	switch (event_id) {
 		case KNOB_EFFECT_POS:
 			if (p_pic->next_pic != NULL) {
 				printf("next\n");
 				active_pic = p_pic->next_pic;
-				ret = 0;
+				active_pic->parent_pic = p_pic->parent_pic;
 			}
 			break;
 
 		case KNOB_EFFECT_NEG:
 			if (p_pic->pre_pic != NULL) {
-				active_pic = p_pic->pre_pic;
 				printf("pre\n");
-				ret = 0;
+				active_pic = p_pic->pre_pic;
+				active_pic->parent_pic = p_pic->parent_pic;
 			}
 			break;
 
@@ -73,19 +73,21 @@ int pic_event_handler(int event_id, struct picture_s *p_pic)
 			if (p_pic->child_pic!= NULL) {
 				printf("enter\n");
 				active_pic = p_pic->child_pic;
-				ret = 0;
+				active_pic->parent_pic = p_pic;
 			}
 			break;
 
 		case KEY_RETURN:
 			if (p_pic->parent_pic != NULL) {
-				active_pic = p_pic->parent_pic;
 				printf("return\n");
-				ret = 0;
+				active_pic = p_pic->parent_pic;
+				active_pic->child_pic = p_pic;
 			}
 			break;
 
 		default:
+
+			ret = -1;
 			break;
 	}
 
@@ -97,6 +99,7 @@ int data_indecrease_hanlder(int event_id, int match_event_id[32], struct window_
 	int val = 0;
 	int ret = 0;
 
+	/* Notice: match_event_id[0] for data increase; match_event_id[1] for data decrease */
 	if (match_event_id[0] != -1 && event_id == match_event_id[0]) {
 		p_win->attr.data_func(DATA_READ, &val);
 		val++;
