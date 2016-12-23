@@ -84,25 +84,25 @@ struct limit_float {
 	float interval;
 };
 
-struct event_type_s {
-	int type; 	/* key or knob */
-	int knob_dir;
-	int event_id;
-};
-
 struct event_id_s {
 	int pre_event;
 	int next_event;
 	int child_event;
 	int parent_event;
+};
 
-	int knob_pos_win[6];
-	int knob_neg_win[6];
+/* forward declare */
+struct window_des_s;
 
-	int knob_pos_pic;
-	int knob_net_pic;
+struct knob_event_handler_struct {
+	int knob_pos_event;
+	int knob_neg_event;
+	int (*event_handler)(int dir, struct window_des_s *p_win);
+};
 
-	int misc_event[6];
+struct misc_event_handler_struct {
+	int event_id;
+	int (*event_handler)(int event_id, struct window_des_s *p_win);
 };
 
 struct attr_des_s {
@@ -121,7 +121,8 @@ struct attr_des_s {
 
 struct window_des_s {
 	struct attr_des_s attr;
-	int (*event_handler)(struct event_type_s event_type, struct window_des_s *p_win);
+	struct knob_event_handler_struct knob_event_handler;
+	struct misc_event_handler_struct misc_event_handlers[32];
 };
 
 struct picture_s {

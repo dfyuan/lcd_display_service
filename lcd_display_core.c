@@ -75,6 +75,7 @@ static int pic_shift_event_handler(int event_id, struct event_id_s event_id_tabl
 static int lcd_event_handler(int event_id)
 {
 	int i;
+	int j;
 	int event_trigger = 0;
 
 	/* handle picture event */
@@ -91,24 +92,29 @@ static int lcd_event_handler(int event_id)
 
 	/* handle window event */
 	for (i = 0; i < active_pic->windows_num; i++) {
-		if (active_pic->p_win[i].event_handler != NULL) {
-			struct event_type_s event_type;
-			event_trigger = 0;
-			if (active_pic->event_id.knob_pos_win[i] == event_id) {
-				event_type.type = KEY_TYPE_KNOB;
-				event_type.knob_dir = KEY_KNOB_POS;
-				event_trigger = 1;
-			} else if (active_pic->event_id.knob_neg_win[i] == event_id) {
-				event_type.type = KEY_TYPE_KNOB;
-				event_type.knob_dir = KEY_KNOB_NEG;
-				event_trigger = 1;
-			}
+		/* 1. handle knob event */
+		if (active_pic->p_win[i].knob_event_handler.knob_pos_event > 0
+				&& active_pic->p_win[i].knob_event_handler.knob_pos_event == event_id) {
+			active_pic->p_win[i].knob_event_handler.event_handler(KEY_KNOB_POS, &active_pic->p_win[i]);
+			event_trigger = 1;
+		} else if (active_pic->p_win[i].knob_event_handler.knob_neg_event > 0
+				&& active_pic->p_win[i].knob_event_handler.knob_neg_event == event_id) {
+			active_pic->p_win[i].knob_event_handler.event_handler(KEY_KNOB_NEG, &active_pic->p_win[i]);
+			event_trigger = 1;
+		}
 
-			if (event_trigger == 1) {
-				active_pic->p_win[i].event_handler(event_type, &active_pic->p_win[i]);
-				trigger_display();
+		/* 2, handle other misc type event */
+		for (j = 0; j < 32; j++) {
+			if (active_pic->p_win[i].misc_event_handlers[i].event_id > 0
+					&& active_pic->p_win[i].misc_event_handlers[i].event_id == event_id) {
+				active_pic->p_win[i].misc_event_handlers[i].event_handler(event_id, &active_pic->p_win[i]);
+				event_trigger = 1;
 			}
 		}
+	}
+
+	if (event_trigger == 1) {
+		trigger_display();
 	}
 
 	return 0;
